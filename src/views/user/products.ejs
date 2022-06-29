@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="menu">
+      <p>
+        <i><h2>Hola <%= name %></h2></i>
+        <a href="/user/prods">Ver productos</a>
+        <a href="/logout">Cerrar sesión</a>
+      </p>
+    </div>
+    <h1 style="text-align: center">Catálogo de productos</h1>
+    <% if (products) { %>
+    <table>
+      <thead>
+        <td>Nombre</td>
+        <td>Descripción</td>
+        <td>Precio</td>
+        <td>Stock</td>
+        <td>Imagen</td>
+        <td></td>
+      </thead>
+      <% products.forEach((prod)=>{ %>
+      <tr>
+        <td><%= prod.name %></td>
+        <td><%= prod.description %></td>
+        <td><%= prod.price %></td>
+        <td><%= prod.stock %></td>
+        <td><img src="<%= prod.imgURL %>" alt="" /></td>
+        <td><a href="">Agregar</a> <%= prod._id %></td>
+      </tr>
+      <% }) %>
+    </table>
+    <% } %>
+  </body>
+</html>

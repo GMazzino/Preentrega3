@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { carts } from '../dao/dao.js';
+import { isAuth } from '../midwares/auth.js';
 
 const router = Router();
 
@@ -9,6 +10,11 @@ router.post('/', async (req, res) => {
   res.status(ans.status).json(ans.content);
 });
 
+router.get('/', isAuth, async (req, res) => {
+  let ans = await carts.getCartIdByUser(req.user.user);
+  console.log(ans.content);
+  res.status(200).json(ans.content);
+});
 // Adds/updates product to/in cart
 router.post('/:id/productos', async (req, res) => {
   let ans = await carts.addProductToCart(

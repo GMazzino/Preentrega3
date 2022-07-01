@@ -18,6 +18,7 @@ const usersSchema = new mongoose.Schema(
     age: { type: Number, required: true },
     address: { type: String, maxlength: 50, required: true },
     phoneNmbr: { type: String, maxlength: 14, required: true },
+    avatar: { type: String, maxlength: 55 },
   },
   { versionKey: false }
 );

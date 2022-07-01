@@ -1,6 +1,7 @@
 import app from './server.js';
 import appConfig from '../app_config.js';
 import logger from './utils/logger.js';
+import twilioClient from './utils/twilio.js';
 
 app
   .listen(appConfig.PORT, () => {

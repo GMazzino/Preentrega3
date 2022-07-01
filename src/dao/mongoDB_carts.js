@@ -4,83 +4,98 @@ import {
   productsModel,
 } from '../models/mongoDB_schemas.js';
 import appConfig from '../../app_config.js';
+import logger from '../utils/logger.js';
 
-export default class Carts {
-  #createMongo() {
-    const db = mongoose.connect(
-      appConfig.mongoRemote.url,
-      appConfig.mongoRemote.advancedOptions
-    ).connection;
-    return db;
+class Carts {
+  async #dbConnection() {
+    try {
+      await mongoose.connect(appConfig.mongoRemote.url, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+      mongoose.connection.on('error', (err) => {
+        logger.error(`${err}`);
+        throw Error(err.message);
+      });
+      return mongoose.connection;
+    } catch (err) {
+      logger.error(`${err}`);
+      throw Error(err.message);
+    }
   }
 
-  async createCartId() {
+  async createCartId(user) {
     try {
-      const db = this.#createMongo();
-      let createdCartId = await new cartsModel({ products: [] }).save();
-      return { status: 200, content: { success: createdCartId.id } };
+      const db = await this.#dbConnection();
+      let createdCartId = await new cartsModel({
+        user: user,
+        products: [],
+      }).save();
+      await db.close();
+      return { status: 200, content: createdCartId.id };
     } catch (err) {
+      logger.error(err);
       return {
         status: 500,
-        content: { error: `Server error: ${err.message}` },
+        content: `Server error: ${err.message}`,
       };
     }
   }
 
   async delCart(cartId) {
     if (mongoose.isValidObjectId(cartId)) {
-      const db = this.#createMongo();
+      const db = await this.#dbConnection();
       try {
         let del = await cartsModel.findByIdAndDelete(cartId);
         if (del !== null) {
           return {
             status: 200,
-            content: { success: `Carrito con ID: ${cartId} borrado` },
+            content: `Carrito con ID: ${cartId} borrado`,
           };
         } else {
           return {
             status: 200,
-            content: { error: `Carrito con ID: ${cartId} no encontrado` },
+            content: `Carrito con ID: ${cartId} no encontrado`,
           };
         }
       } catch (err) {
         return {
           status: 500,
-          content: { error: `Server error: ${err.message}` },
+          content: `Server error: ${err.message}`,
         };
       }
     } else {
       return {
         status: 400,
-        content: { error: `Error en la peticion.` },
+        content: `Error en la peticion.`,
       };
     }
   }
 
   async getCartProducts(cartId) {
     if (mongoose.isValidObjectId(cartId)) {
-      const db = this.#createMongo();
+      const db = await this.#dbConnection();
       try {
         let cart;
         if ((cart = await cartsModel.findById(cartId)) != null) {
           return {
             status: 200,
-            content: { success: cart.products },
+            content: cart.products,
           };
         } else {
           return {
             status: 200,
-            content: { error: `El carrito ${cartId} no existe` },
+            content: `El carrito ${cartId} no existe`,
           };
         }
       } catch (err) {
         return {
           status: 500,
-          content: { error: `Server error: ${err.message}` },
+          content: `Server error: ${err.message}`,
         };
       }
     } else {
-      return { status: 400, content: { error: `Error en la peticion.` } };
+      return { status: 400, content: `Error en la peticion.` };
     }
   }
 
@@ -91,7 +106,7 @@ export default class Carts {
       !isNaN(quantity)
     ) {
       try {
-        const db = this.#createMongo();
+        const db = await this.#dbConnection();
         let cart;
         let cartProducts;
         if ((cart = await cartsModel.findById(cartId)) != null) {
@@ -119,13 +134,13 @@ export default class Carts {
           } else {
             return {
               status: 200,
-              content: { error: `Producto no encontrado` },
+              content: `Producto no encontrado`,
             };
           }
         } else {
           return {
             status: 200,
-            content: { error: `El carrito ${cartId} no existe` },
+            content: `El carrito ${cartId} no existe`,
           };
         }
         let result = await cartsModel.findOneAndUpdate(
@@ -135,14 +150,12 @@ export default class Carts {
         if (result != null) {
           return {
             status: 200,
-            content: {
-              success: `Producto con ID ${productId} agregado/actualizado en el carrito con ID ${cartId}`,
-            },
+            content: `Producto con ID ${productId} agregado/actualizado en el carrito con ID ${cartId}`,
           };
         } else {
           return {
             status: 500,
-            content: { error: `No se pudo guardar el producto.` },
+            content: `No se pudo guardar el producto.`,
           };
         }
       } catch (err) {
@@ -151,9 +164,7 @@ export default class Carts {
     } else {
       return {
         status: 200,
-        content: {
-          error: `Error en la peticion.`,
-        },
+        content: `Error en la peticion.`,
       };
     }
   }
@@ -163,7 +174,7 @@ export default class Carts {
       mongoose.isValidObjectId(cartId) &&
       mongoose.isValidObjectId(productId)
     ) {
-      const db = this.#createMongo();
+      const db = await this.#dbConnection();
       let cart;
       try {
         if ((cart = await cartsModel.findById(cartId)) != null) {
@@ -171,37 +182,35 @@ export default class Carts {
           if (cart.products[0] !== undefined) {
             cartProducts = cartProducts.filter((prod) => prod.id !== productId);
           } else {
-            return { status: 200, content: { error: `El carrito esta vacio` } };
+            await db.close();
+            return { status: 200, content: `El carrito esta vacio` };
           }
           let result = await cartsModel.findOneAndUpdate(
             { _id: cartId },
             { products: cartProducts }
           );
+          await db.close();
           if (result != null) {
             return {
               status: 200,
-              content: {
-                success: `Producto con ID ${productId} borrado del carrito con ID ${cartId}`,
-              },
+              content: `Producto con ID ${productId} borrado del carrito con ID ${cartId}`,
             };
           } else {
             return {
               status: 500,
-              content: { error: `No se pudo borrar el producto.` },
+              content: `No se pudo borrar el producto.`,
             };
           }
         } else {
           return {
             status: 200,
-            content: {
-              error: `El carrito con ID ${cartId} no existe`,
-            },
+            content: `El carrito con ID ${cartId} no existe`,
           };
         }
       } catch (err) {
         return {
           status: 500,
-          content: { error: `Server error: ${err.message}` },
+          content: `Server error: ${err.message}`,
         };
       }
     } else {
@@ -211,4 +220,16 @@ export default class Carts {
       };
     }
   }
+
+  async getCartIdByUser(user) {
+    const db = await this.#dbConnection();
+    let cartId = await cartsModel.findOne({ user: user }, '_id');
+    if (!cartId) {
+      cartId = await this.createCartId(user);
+    }
+    await db.close();
+    return { status: 200, content: cartId._id };
+  }
 }
+
+export const cart = new Carts();

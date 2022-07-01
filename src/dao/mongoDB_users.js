@@ -23,15 +23,15 @@ class User {
   }
 
   //---------------------------------------------------------------------------
-  // findUserByName: Verifies if user exists in db.
-  // Param user: username to be searched
+  // findByUsername: Verifies if user exists in db.
+  // Param userName: username to be searched
   // Returns foundUser: user object in case it exists in db or null otherwise
   //---------------------------------------------------------------------------
-  async findUserByName(userName) {
-    if (userName) {
+  async findByUserId(userId) {
+    if (userId) {
       const db = await this.#dbConnection();
       try {
-        const foundUser = await userModel.findOne({ user: userName });
+        const foundUser = await userModel.findOne({ user: userId });
         await db.close();
         return foundUser;
       } catch (err) {
@@ -44,6 +44,28 @@ class User {
   }
 
   //---------------------------------------------------------------------------
+  // findByName: Verifies if user exists in db.
+  // Param user: username to be searched
+  // Returns foundUser: user object in case it exists in db or null otherwise
+  //---------------------------------------------------------------------------
+
+  // async findByName(name) {
+  //   if (name) {
+  //     const db = await this.#dbConnection();
+  //     try {
+  //       const foundUser = await userModel.findOne({ name: name });
+  //       await db.close();
+  //       return foundUser;
+  //     } catch (err) {
+  //       logger.error(`${err}`);
+  //       throw Error(err.message);
+  //     }
+  //   } else {
+  //     throw new Error('Error en la petición. Se requiere usuario');
+  //   }
+  // }
+
+  //---------------------------------------------------------------------------
   // addUser: Adds a new user to db.
   // Params user: user object according to mongo DB user Schema
   //        pwd: plain password
@@ -51,7 +73,7 @@ class User {
   async addUser(user, pwd) {
     if (user.username && pwd) {
       try {
-        let newUser = await this.findUserByName(user.username);
+        let newUser = await this.findByUserId(user.username);
         if (!newUser) {
           const pwdHash = await hashDehash({ pwd: pwd, op: 'hash' });
           const db = await this.#dbConnection();
@@ -62,9 +84,8 @@ class User {
             age: user.age,
             address: user.address,
             phoneNmbr: user.phone,
+            avatar: user.avatar,
           });
-          logger.info('Closing DB connection');
-          sendMail(newUser);
           await db.close();
           return newUser;
         } else {

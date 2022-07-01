@@ -1,11 +1,16 @@
 import { Router } from 'express';
 import passport from '../models/passport_local.js';
 import { isAuth } from '../midwares/auth.js';
+import upload from '../midwares/file_uploader.js';
+import logger from '../utils/logger.js';
 
 const router = Router();
 
 router.get('/', isAuth, (req, res) => {
-  res.render('index', { name: req.session.passport.user.name });
+  res.render('index', {
+    name: req.user.name,
+    avatar: req.user.avatar,
+  });
 });
 
 router.get('/login', (req, res) => {
@@ -26,6 +31,7 @@ router.get('/register', (req, res) => {
 
 router.post(
   '/register',
+  upload.single('avatar'),
   passport.authenticate('register', {
     failureRedirect: '/register',
     successRedirect: '/',

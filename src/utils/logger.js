@@ -13,7 +13,7 @@ const errorFilter = winston.format((info, opts) => {
   return info.level === 'error' ? info : false;
 });
 
-const logger = winston.createLogger({
+export default winston.createLogger({
   format: combine(
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
     printf(
@@ -51,5 +51,3 @@ const logger = winston.createLogger({
     }),
   ],
 });
-
-export default logger;

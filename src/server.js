@@ -30,7 +30,7 @@ app.all('*', (req, res) => {
     `Method ${req.method} on route "${req.originalUrl}" not implemented.`
   );
   res.status(400).json({
-    error: `Método ${req.method} en ruta "${req.originalUrl}" no implementado.`,
+    error: `Método ${req.method} en ruta '${req.originalUrl}' no implementado.`,
   });
 });
 

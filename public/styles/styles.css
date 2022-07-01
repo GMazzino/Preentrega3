@@ -13,3 +13,13 @@
   text-align: right;
   display: inline-block;
 }
+
+.prodTable tr td {
+  border: 1px solid black;
+  text-align: center;
+}
+
+.prodTable {
+  margin: 0 auto;
+  border-collapse: collapse;
+}

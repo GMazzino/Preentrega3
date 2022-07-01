@@ -1,1 +1,6 @@
-[2022-06-28 18:32:58.911] WARN: Method GET on route "/user" not implemented.
+[2022-07-01 05:06:56.890] WARN: Method GET on route "/avatars/a@acom" not implemented.
+[2022-07-01 05:20:16.804] WARN: Method GET on route "/avatars/a@acom" not implemented.
+[2022-07-01 05:25:12.618] WARN: Method GET on route "/avatars/a@acom" not implemented.
+[2022-07-01 08:08:44.972] WARN: Module: utils/mailer.js. Method: sendmail -> No match to send email. data: user, type: undefined
+[2022-07-01 08:15:32.909] WARN: Method GET on route "/user/cart/" not implemented.
+[2022-07-01 08:33:12.161] WARN: Module: utils/mailer.js. Method: sendmail -> No match to send email. data: eulah.reynolds21@ethereal.email, type: [object Object],[object Object],[object Object]

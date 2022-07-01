@@ -1,0 +1,3 @@
+[2022-07-01 08:00:11.309] ERROR: sendMail is not defined
+[2022-07-01 09:29:45.994] ERROR: Module: utils/twilio.js Method: wapp -> Error: The 'To' number whatsapp:undefined is not a valid phone number.
+[2022-07-01 09:34:25.262] ERROR: Module: utils/twilio.js Method: wapp -> Error: A text message body or media urls must be specified.

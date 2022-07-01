@@ -1,3 +1,4 @@
 node_modules/
 products.csv
 mongosrv.bat
+.env

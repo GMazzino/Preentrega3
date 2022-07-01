@@ -14,8 +14,8 @@ switch (appConfig.PERSISTENCE) {
   case 'mongoDB':
     const { products: prods } = await import('./mongoDB_products.js');
     products = prods;
-    const { default: MongoDBCarts } = await import('./mongoDB_carts.js');
-    carts = new MongoDBCarts();
+    const { cart } = await import('./mongoDB_carts.js');
+    carts = cart;
     break;
 
   default:

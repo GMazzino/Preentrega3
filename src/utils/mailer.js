@@ -13,34 +13,46 @@ const mailSender = mailer.createTransport({
 const mailData = {
   from: 'E-Commerce Server',
   to: process.env.ADMIN_MAIL,
-  subject: 'Nuevo registro',
+  subject: '',
   html: '',
 };
 
 export default async function sendMail(data, type) {
-  let html = '';
   switch (type) {
     case 'user':
-      html = `Se informa la creación de un nuevo usuario.<br /><br />`;
-      html += `<ul>`;
-      html += `<li>Mail: ${data.user}</li>`;
-      html += `<li>Nombre: ${data.name}</li>`;
-      html += `<li>Edad: ${data.age}</li>`;
-      html += `<li>Domicilio: ${data.address}</li>`;
-      html += `<li>Teléfono: ${data.phoneNmbr}</li>`;
-      html += `</ul>`;
+      mailData.subject = 'Nuevo registro';
+      mailData.html = `Se informa la creación de un nuevo usuario.<br /><br />`;
+      mailData.html += `<ul>`;
+      mailData.html += `<li>Mail: ${data.user}</li>`;
+      mailData.html += `<li>Nombre: ${data.name}</li>`;
+      mailData.html += `<li>Edad: ${data.age}</li>`;
+      mailData.html += `<li>Domicilio: ${data.address}</li>`;
+      mailData.html += `<li>Teléfono: ${data.phoneNmbr}</li>`;
+      mailData.html += `</ul>`;
       break;
 
     case 'order':
+      mailData.subject = `Nuevo pedido de ${data.name} (${data.user})`;
+      mailData.html = 'Se informa detalle de nuevo pedido: <br /> <br />';
+      let totalOrder = 0;
+      data.forEach((p) => {
+        mailData.html += `Articulo: ${p.code}<br />`;
+        mailData.html += `Nombre: ${p.name}<br />`;
+        mailData.html += `Cantidad: ${p.quantity}<br />`;
+        mailData.html += `Precio unit: $ ${p.price}<br />`;
+        mailData.html += `Total: $ ${parseInt(p.quantity) * parseFloat(p.price)}<br /><br />`;
+        totalOrder += parseInt(p.quantity) * parseFloat(p.price);
+      });
+      mailData.html += `Total del pedido: $ ${totalOrder}`;
       break;
+
     default:
+      logger.warn(`Module: utils/mailer.js. Method: sendmail -> No match to send email.`);
       break;
   }
-  mailData.html = html;
   try {
-    await mailSender.sendMail(mailData);
-    logger.info('New registered user email successfully sent');
+    mailSender.sendMail(mailData);
   } catch (err) {
-    logger.error(err);
+    logger.error(`Module: utils/mailer.js Method: sendMail -> ${err}`);
   }
 }
